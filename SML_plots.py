@@ -5,9 +5,8 @@ Created on Fri Jul 10 13:17:07 2020
 @author: olehe
 
 
-This script should take data averaged per hour,
-and the k-means data,
-and make plots
+This script makes plots
+And does the correlation between ATUS ADI and Musical Variability
 
 """
 
@@ -17,30 +16,26 @@ and make plots
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
-
-
 import seaborn as sns
 from matplotlib import pyplot as plt
+import scipy.stats
+import scipy.signal
 
 
 
 #%% Read data
-# Data is now moved to Reproducible scripts folder
 
 # This is the Spotify data averaged per unique hour
 hourAvgData = pd.read_pickle('data/hourAvgDataPickle')
 hourAvgValues = hourAvgData.values
 
-# scaling for the K-means
-
+# Scaled data
 scaler = preprocessing.StandardScaler()
 scaler.fit(hourAvgValues)
-
 hourAvgScaled = scaler.transform(hourAvgValues)
 
 
-# read the labels
-
+# Read the k-means labels
 skm_5_labels = pd.read_pickle('data/kmeansLabelsForKequal5')
 skm_5_labels = skm_5_labels.values
 
@@ -49,7 +44,6 @@ skm_5_labels = skm_5_labels.values
 #%% Section for looking at standard deviations, and for plotting day cycles
 
 # Make a non-scaled dataframe
-
 rawDataFrame = pd.DataFrame(hourAvgValues, index=range(0,168), columns=['bsMean', 'bsStd',
 	'loudMean', 'loudStd',
 	'mechMean', 'mechStd',
@@ -66,8 +60,6 @@ rawDataFrame = pd.DataFrame(hourAvgValues, index=range(0,168), columns=['bsMean'
 	'speechMean', 'speechStd',
 	'valMean', 'valStd'])
 rawDataFrame['hour'] = range(0,168)
-
-
 
 # Make a scaled dataframe
 scaledDataFrame = pd.DataFrame(hourAvgScaled, index=range(0,168), columns=['bsMean', 'bsStd',
@@ -89,11 +81,9 @@ scaledDataFrame['hour'] = range(0,168)
 
 
 # Calculate mean values for each subdivision, as well as std's.
-
 rawDataFrame['subdivision'] = skm_5_labels
 
 # For practical reasons, remap the subdivision labels
-
 subDict ={0:'Late Night/Early Morning',
 		  1:'Afternoon',
 		  2:'Night',
@@ -102,6 +92,7 @@ subDict ={0:'Late Night/Early Morning',
 
 rawDataFrame.replace({'subdivision':subDict}, inplace=True)
 
+# Mean values
 meanValues = rawDataFrame[['bsMean', 'loudMean', 
 						     'mechMean','orgMean',
 							 'tempMean', 'acousMean',
@@ -110,7 +101,7 @@ meanValues = rawDataFrame[['bsMean', 'loudMean',
 							 'flatMean', 'instMean',
 							 'liveMean', 'speechMean',
 							 'valMean','subdivision']].groupby('subdivision').mean()
-
+# Mean STD values
 meanStdValues = rawDataFrame[['bsStd', 'loudStd', 
 						     'mechStd','orgStd',
 							 'tempStd', 'acousMean',
@@ -120,6 +111,8 @@ meanStdValues = rawDataFrame[['bsStd', 'loudStd',
 							 'liveStd', 'speechStd',
 							 'valStd','subdivision']].groupby('subdivision').mean()
 
+
+# Plot of STDs over the week.
 plt.figure(figsize=(22,8))
 stdPlot = sns.lineplot(x='hour', y='value', hue='variable', 
 					   data=pd.melt(scaledDataFrame[['bsStd', 'loudStd', 
@@ -137,14 +130,13 @@ stdPlot.set(xlim=(0,167))
 stdPlot.set_xticks([0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 102, 108, 114, 120, 126, 132, 138, 144, 150, 156, 162])
 stdPlot.set_xticklabels(np.tile([0,6,12,18], 7))
 stdPlot.set_title('STDs over the week')
-
 colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 for n in range(0,168):
 	stdPlot.axvspan(n, n+1, facecolor=colors[int(skm_5_labels[n])], alpha=.2)
-#plt.savefig("plots/allVariables.svg", format="svg")	
+#plt.savefig("plots/weekSTDs.svg", format="svg")	
 
 
-#%% Section for groupby of std's
+#%% Groupyby subdivision and mean.
 	
 groupStds = rawDataFrame[['bsMean', 'bsStd',
 	'loudMean', 'loudStd',
@@ -162,13 +154,12 @@ groupStds = rawDataFrame[['bsMean', 'bsStd',
 	'speechMean', 'speechStd',
 	'valMean', 'valStd','subdivision']].groupby('subdivision').mean()
 
-#%% Section for plotting std's and then averaging over 24 hours, and maybe even doing stats?
+#%% Section for plotting std's and then averaging over 24 hours
 
 
+# Add hour of the day to the dataframe
 hourOfDay = np.tile(np.arange(0,24),7)
-
 scaledDataFrame['hourOfDay']=hourOfDay
-
 stdsByHour = scaledDataFrame[['bsStd', 'loudStd', 
 							  'mechStd','orgStd',
 							  'tempStd', 'acousStd',
@@ -179,13 +170,10 @@ stdsByHour = scaledDataFrame[['bsStd', 'loudStd',
 							  'valStd','hourOfDay']].groupby(['hourOfDay']).mean()
 
 stdsByHour['hourOfDay'] = np.arange(0,24)
-plt.figure(figsize=(8,8))
-stdsHourPlot = sns.lineplot(x='hourOfDay', y='value', hue='variable',
-							data=pd.melt(stdsByHour, id_vars='hourOfDay'),
-							label=None)
 
 
 
+# Plot of 24-hour audio feature variability
 plt.figure(figsize=(8,8))
 stdsHourPlot = sns.lineplot(x='hourOfDay', y='value', hue='variable',
 							data=pd.melt(scaledDataFrame[['bsStd', 'loudStd', 
@@ -202,14 +190,14 @@ stdsHourPlot.set(xlim=(0,23))
 stdsHourPlot.set_xticks([0, 6, 12, 18])
 stdsHourPlot.set_xticklabels([0,6,12,18])
 stdsHourPlot.set_title('24-hour audio feature variability')
-plt.savefig("plots/variability24hour.svg", format="svg")	
+#plt.savefig("plots/variability24hour.svg", format="svg")	
 
 
-# how about a correlation here?
+#%% Correlate with atus 
 
-diversityLine = pd.read_pickle('diversityActivityValue.pkl')
-# now mean the rest
+diversityLine = pd.read_pickle('data/aidValues.pkl')
 
+# Average stds per hour, for all of the variables
 stddata=pd.melt(scaledDataFrame[['bsStd', 'loudStd', 
 							  'mechStd','orgStd',
 							  'tempStd', 'acousStd',
@@ -220,28 +208,19 @@ stddata=pd.melt(scaledDataFrame[['bsStd', 'loudStd',
 							  'valStd','hourOfDay']], id_vars='hourOfDay')
 stdLine = stddata[['hourOfDay', 'value']].groupby('hourOfDay').mean()
 
-import scipy.stats
-import scipy.signal
-scipy.stats.normaltest(diversityLine['Diversity'])
-scipy.stats.normaltest(stdLine['value'])
-scipy.stats.pearsonr(diversityLine['Diversity'], stdLine['value'])
 
+normal1=scipy.stats.normaltest(diversityLine['Diversity'])
+normal2=scipy.stats.normaltest(stdLine['value'])
+corr = scipy.stats.pearsonr(diversityLine['Diversity'], stdLine['value'])
 
-# maybe a scatterplot here
+print('Correlation is ' + str(np.round(corr[0],3)) + ', p=' + str(np.round(corr[1],3)))
 
-scatterDf = pd.DataFrame([diversityLine['Diversity'], stdLine['value']])
-scatterDf = scatterDf.T
-
-plt.figure(figsize=(8,8))
-corrPlot = sns.regplot(data=scatterDf, x='Diversity', y='value')
-corrPlot.set(xlim=(-0.0004, -0.00005))
 
 
 
 
 #%% Plot for single features average over the 24-hour
-# BUT, need to reorganize these so that they match the subdivisions
-# Fuck, do I have to just +6 the hourofday?
+# Reorganizing to match the subdivisions, by adding a 6 hour offset.
 
 scaledDataFrame['hourOfDayOffset'] = scaledDataFrame['hourOfDay'] + 6
 
@@ -256,7 +235,7 @@ tempHourPlot.set(ylim=(-2.5,2.5))
 tempHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
 tempHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
 tempHourPlot.set_title('Tempo')
-plt.savefig("plots/temp24hour.svg", format="svg")	
+#plt.savefig("plots/temp24hour.svg", format="svg")	
 
 
 plt.figure(figsize=(22,2))
@@ -269,7 +248,7 @@ danceHourPlot.set(ylim=(-2.5,2.5))
 danceHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
 danceHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
 danceHourPlot.set_title('Danceability')
-plt.savefig("plots/dance24hour.svg", format="svg")	
+#plt.savefig("plots/dance24hour.svg", format="svg")	
 
 plt.figure(figsize=(22,2))
 loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
@@ -281,11 +260,11 @@ loudHourPlot.set(ylim=(-2.5,2.5))
 loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
 loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
 loudHourPlot.set_title('Loudness')
-plt.savefig("plots/loud24hour.svg", format="svg")	
+#plt.savefig("plots/loud24hour.svg", format="svg")	
 
 
 
-#%% Make some plots
+#%% Plot of all mean values over the entire week
 
 # Plot for all the means
 plt.figure(figsize=(22,8))
@@ -309,7 +288,7 @@ allPlot.set_title('K-means clustering of MIR-data, k=5')
 colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 for n in range(0,168):
 	allPlot.axvspan(n, n+1, facecolor=colors[int(skm_5_labels[n])], alpha=.2)
-plt.savefig("plots/allVariables.svg", format="svg")	
+#plt.savefig("plots/allVariables.svg", format="svg")	
 
 
 #%% Smaller plots
@@ -329,7 +308,7 @@ allPlot.set_title('Danceability')
 colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 for n in range(0,168):
 	allPlot.axvspan(n, n+1, facecolor=colors[int(skm_5_labels[n])], alpha=.2)
-plt.savefig("plots/danceability.svg", format="svg")	
+plt.savefig("plots/Weekly-danceability.svg", format="svg")	
 	
 
 # Plot for tempo, but smaller
@@ -347,7 +326,7 @@ allPlot.set_title('Tempo')
 colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 for n in range(0,168):
 	allPlot.axvspan(n, n+1, facecolor=colors[int(skm_5_labels[n])], alpha=.2)
-plt.savefig("plots/tempo.svg", format="svg")	
+plt.savefig("plots/Weekly-tempo.svg", format="svg")	
 	
 
 # Plot for beath strength, but smaller
@@ -366,7 +345,7 @@ colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 for n in range(0,168):
 	allPlot.axvspan(n, n+1, facecolor=colors[int(skm_5_labels[n])], alpha=.2)
 	
-plt.savefig("plots/beatstrength.svg", format="svg")	
+plt.savefig("plots/Weekly-beatstrength.svg", format="svg")	
 	
 
 # Plot for loudness, but smaller
@@ -384,7 +363,7 @@ allPlot.set_title('Loudness')
 colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 for n in range(0,168):
 	allPlot.axvspan(n, n+1, facecolor=colors[int(skm_5_labels[n])], alpha=.2)
-plt.savefig("plots/loudness.svg", format="svg")	
+plt.savefig("plots/Weekly-loudness.svg", format="svg")	
 
 
 
@@ -405,7 +384,7 @@ allPlot.set_title('Mechanism')
 colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 for n in range(0,168):
 	allPlot.axvspan(n, n+1, facecolor=colors[int(skm_5_labels[n])], alpha=.2)
-plt.savefig("plots/mechanism.svg", format="svg")		
+plt.savefig("plots/Weekly-mechanism.svg", format="svg")		
 	
 	
 # Plot for organism, but smaller
@@ -423,14 +402,14 @@ allPlot.set_title('Organism')
 colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 for n in range(0,168):
 	allPlot.axvspan(n, n+1, facecolor=colors[int(skm_5_labels[n])], alpha=.2)
-	
+plt.savefig("plots/Weekly-organism.svg", format="svg")
 #%% Vertical bar plot of difference
 	
 	
 diffData = pd.read_csv('data/subdivisionAudioFeatures.csv')
 
 
-# might have to divide them up due to the scale differences.
+# Divide them due to scale differences
 
 diffData = diffData[['subdivision', 'loudMean', 'tempMean', 'dynMean']]
 
@@ -443,7 +422,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,2))
 mPlot = sns.barplot(data=morningAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.31, .31))
-plt.savefig('plots/morningDiffBig.svg', format='svg')
+#plt.savefig('plots/morningDiffBig.svg', format='svg')
 
 
 
@@ -468,7 +447,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,2))
 mPlot = sns.barplot(data=eveningAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.31, .31))
-plt.savefig('plots/eveningDiffBig.svg', format='svg')
+#plt.savefig('plots/eveningDiffBig.svg', format='svg')
 
 
 nightAudio = diffData[diffData.subdivision == 'Night']
@@ -480,7 +459,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,2))
 mPlot = sns.barplot(data=nightAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.31, .31))
-plt.savefig('plots/nightDiffBig.svg', format='svg')
+#plt.savefig('plots/nightDiffBig.svg', format='svg')
 
 
 emlnAudio = diffData[diffData.subdivision == 'Early Morning/Late Night']
@@ -492,7 +471,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,2))
 mPlot = sns.barplot(data=emlnAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.31, .31))
-plt.savefig('plots/emlnDiffBig.svg', format='svg')
+#plt.savefig('plots/emlnDiffBig.svg', format='svg')
 
 # now for the rest
 
@@ -514,7 +493,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,8))
 mPlot = sns.barplot(data=morningAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.02, .02))
-plt.savefig('plots/morningDiffSmall.svg', format='svg')
+#plt.savefig('plots/morningDiffSmall.svg', format='svg')
 
 
 
@@ -527,7 +506,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,8))
 mPlot = sns.barplot(data=afternoonAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.02, .02))
-plt.savefig('plots/afternoonDiffSmall.svg', format='svg')
+#plt.savefig('plots/afternoonDiffSmall.svg', format='svg')
 
 
 eveningAudio = diffData[diffData.subdivision == 'Evening']
@@ -539,7 +518,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,8))
 mPlot = sns.barplot(data=eveningAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.02, .02))
-plt.savefig('plots/eveningDiffSmall.svg', format='svg')
+#plt.savefig('plots/eveningDiffSmall.svg', format='svg')
 
 
 nightAudio = diffData[diffData.subdivision == 'Night']
@@ -551,7 +530,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,8))
 mPlot = sns.barplot(data=nightAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.02, .02))
-plt.savefig('plots/nightDiffSmall.svg', format='svg')
+#plt.savefig('plots/nightDiffSmall.svg', format='svg')
 
 
 emlnAudio = diffData[diffData.subdivision == 'Early Morning/Late Night']
@@ -563,7 +542,7 @@ sns.set(style='whitegrid')
 plt.figure(figsize=(4,8))
 mPlot = sns.barplot(data=emlnAudio, orient='h', palette=hues)
 mPlot.set(xlim=(-.02, .02))
-plt.savefig('plots/emlnDiffSmall.svg', format='svg')
+#plt.savefig('plots/emlnDiffSmall.svg', format='svg')
 
 
 

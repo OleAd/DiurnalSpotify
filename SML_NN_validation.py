@@ -26,60 +26,29 @@ from the Spotify API.
  
 The neural network is designed to be compatible with Tensorflow JS.
 
-Some package versions:
+Some key package versions:
 	Python 3.7.6
 	cudaatoolkit 10.0.130
 	tensorflow 2.0.0
 	tensorflow-gpu 2.0.0
 
-
-This project is not published or preprinted yet.
-If you use it, please cite the github repository until a paper has been published.
-
-
 """
 
 #%% Imports
-# Many of these imports are not needed in this version of the script.
-# Remove unused imports on line 48:64, and 68:76 if needed.
 
 import tensorflow as tf
-
 from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Activation, Dense, LeakyReLU, Lambda, Dropout
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.utils import plot_model
-from tensorflow.keras.optimizers import Adam, Adadelta, Nadam, SGD, Adamax, Adadelta
-from tensorflow.keras.regularizers import l1
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.keras import backend as K
-
-
-from sklearn.datasets import make_classification
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.utils import shuffle
-from sklearn.metrics import confusion_matrix, classification_report, mean_squared_error, mean_absolute_error, r2_score
-from sklearn.model_selection import train_test_split
-
-import matplotlib.pyplot as plt
-
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.optimizers import Adam
 import pandas as pd
 import numpy as np
-import seaborn as sns
 
-import time
 
-import pickle
+#%% Defining functions
 
-import spotipy
-import spotipy.util as util
-import random
-
-#%% Some definitions
 
 # Simple function for remapping variables
-# Copied from PenguinTD on Stackoverflow
+# Adapted from PenguinTD on Stackoverflow
 def remap( x, oMin, oMax, nMin, nMax ):
 	# range check
 	if oMin == oMax:
@@ -114,7 +83,7 @@ def remap( x, oMin, oMax, nMin, nMax ):
 	
 	return result
 
-
+# This function just spells out the prediction
 def printPrediction(value):
 	if value==0:
 		print('Main prediction is late night/early morning')
@@ -135,16 +104,13 @@ def printPrediction(value):
 # This loads the pre-trained model.
 # Note that this model includes activity regularization
 
-
-model = load_model('pretrained/')
+model = load_model('neural_network/')
 
 
 #%% Make a new model without activity regularization
-# TFJS does not support activity regularization, so remake the model without them
+# TFJS does not support activity regularization
 
 model_2 = Sequential()
-
-
 model_2.add(Dense(64, input_shape=(6,), activation='sigmoid'))
 model_2.add(Dropout(0.3))
 model_2.add(Dense(128, activation='sigmoid'))
@@ -153,15 +119,13 @@ model_2.add(Dense(64, activation='sigmoid'))
 model_2.add(Dropout(0.3))
 model_2.add(Dense(32, activation='sigmoid'))
 model_2.add(Dense(5, activation='softmax'))
-
-
 model_2.compile(Adam(), loss='categorical_crossentropy', metrics=['accuracy'])
 model_2.set_weights(model.get_weights())
 
-#%% Check the models on the testing part of the dataset
+#%% Test both models on the testing (holdout) dataset
 
 # Read data
-testingData = pd.read_pickle('testingDataset.pkl')
+testingData = pd.read_pickle('data/holdoutDataset.pkl')
 testingDataValues = testingData[['danceability', 'energy', 'loudness', 'liveness', 'valence', 'tempo']]
 testingDataValues = np.array(testingDataValues)
 
@@ -177,7 +141,6 @@ testingDataValues[:,5] = remap(testingDataValues[:,5], 40, 220, -1, 1)
 testingDataLabels = testingData['subdivision']
 testingDataLabels = np.array(testingDataLabels)
 
-
 # Change labels to categorical
 testingDataLabels = tf.keras.utils.to_categorical(testingDataLabels)
 
@@ -185,10 +148,13 @@ testingDataLabels = tf.keras.utils.to_categorical(testingDataLabels)
 results_1 = model.evaluate(testingDataValues, testingDataLabels, batch_size=128)
 results_2 = model_2.evaluate(testingDataValues, testingDataLabels, batch_size=128)
 
+print('Model 1 with regularization performed with accuracy of: ' + str(round(results_1[1],3)) + ' and loss of: ' + str(round(results_1[0],3)))
+print('Model 2 without regularization performed with accuracy of: ' + str(round(results_2[1],3)) + ' and loss of: ' + str(round(results_2[0],3)))
+
 
 
 #%% Example for evaluating the model on one track
-# Chose a random integer to test a track
+# Take a single track from the testing dataset
 thisTrack = testingDataValues[4000,:].reshape(1,6)
 
 thisClassification = model_2.predict(thisTrack)
