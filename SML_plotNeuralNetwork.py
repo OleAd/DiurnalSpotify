@@ -2,7 +2,8 @@
 """
 Created on Tue Sep 22 11:14:38 2020
 
-@author: olehe
+NOTE: much of this is from DenisFLASH on stackoverflow. https://stackoverflow.com/questions/29888233/how-to-visualize-a-neural-network
+
 """
 from matplotlib import pyplot
 from math import cos, sin, atan
