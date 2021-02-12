@@ -260,7 +260,157 @@ loudHourPlot.set(ylim=(-2.5,2.5))
 loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
 loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
 loudHourPlot.set_title('Loudness')
-#plt.savefig("plots/loud24hour.svg", format="svg")	
+#plt.savefig("plots/loud24hour.svg", format="svg")
+
+
+# per reviewer, add these plots for all the audio features.
+
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['dynMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Dynamics')
+plt.savefig("plots/dyn24hour.svg", format="svg")
+
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['bsMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Beat Strength')
+plt.savefig("plots/bs24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['mechMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Mechanism')
+plt.savefig("plots/mech24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['orgMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Organism')
+plt.savefig("plots/org24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['acousMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Acousticness')
+plt.savefig("plots/acous24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['bouncMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Bounciness')
+plt.savefig("plots/bounce24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['enerMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Energy')
+plt.savefig("plots/energy24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['flatMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Flatness')
+plt.savefig("plots/flat24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['instMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Instrumentalness')
+plt.savefig("plots/inst24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['liveMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Liveness')
+plt.savefig("plots/live24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['speechMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Speechiness')
+plt.savefig("plots/speech24hour.svg", format="svg")
+
+plt.figure(figsize=(22,2))
+loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
+							data=pd.melt(scaledDataFrame[['valMean', 'hourOfDayOffset']], id_vars='hourOfDayOffset'),
+							label=None)
+#danceHourPlot.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+loudHourPlot.set(xlim=(6,29))
+loudHourPlot.set(ylim=(-2.5,2.5))
+loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
+loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
+loudHourPlot.set_title('Valence')
+plt.savefig("plots/valence24hour.svg", format="svg")
+
 
 
 
