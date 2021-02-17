@@ -235,7 +235,7 @@ tempHourPlot.set(ylim=(-2.5,2.5))
 tempHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
 tempHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
 tempHourPlot.set_title('Tempo')
-#plt.savefig("plots/temp24hour.svg", format="svg")	
+plt.savefig("plots/temp24hour.svg", format="svg")	
 
 
 plt.figure(figsize=(22,2))
@@ -248,7 +248,7 @@ danceHourPlot.set(ylim=(-2.5,2.5))
 danceHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
 danceHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
 danceHourPlot.set_title('Danceability')
-#plt.savefig("plots/dance24hour.svg", format="svg")	
+plt.savefig("plots/dance24hour.svg", format="svg")	
 
 plt.figure(figsize=(22,2))
 loudHourPlot = sns.lineplot(x='hourOfDayOffset', y='value',
@@ -260,7 +260,7 @@ loudHourPlot.set(ylim=(-2.5,2.5))
 loudHourPlot.set_xticks([6, 9, 12, 15, 18, 21, 24, 27])
 loudHourPlot.set_xticklabels([6, 9, 12, 15, 18, 21, 0, 3])
 loudHourPlot.set_title('Loudness')
-#plt.savefig("plots/loud24hour.svg", format="svg")
+plt.savefig("plots/loud24hour.svg", format="svg")
 
 
 # per reviewer, add these plots for all the audio features.
