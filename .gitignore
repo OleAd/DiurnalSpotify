@@ -3,3 +3,7 @@ spotifyConstants.py
 .Rhistory
 .cache-oleadrian
 .cache-oleadrian
+SML_plots_workInProgress.py
+SML_NN_train_multiNetworkRevision.py
+SML_NN_RELU_ModelCandidatex_.21-0.98.hdf5
+*.lock
